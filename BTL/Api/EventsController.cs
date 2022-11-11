@@ -120,6 +120,7 @@ namespace BTL.Api
                 Description = s.Description,
                 StatusNotification = s.HasNotification,
                 TimeNotification = s.BeginHour.AddMinutes(s.TimeBeforNotification),
+                TimeBeforNotification = s.TimeBeforNotification,
                 Color = s.Color
             }).ToList();
         }
@@ -136,7 +137,7 @@ namespace BTL.Api
                 EndHour = input.EndTime,
                 CalendarId = t,
                 HasNotification = input.StatusNotification,
-                TimeBeforNotification = (input.TimeNotification - input.StartTime).Minutes,
+                TimeBeforNotification = input.TimeBeforNotification,
             };
             _context.Events.Add(@event);
             _context.SaveChanges();
@@ -151,6 +152,7 @@ namespace BTL.Api
         public DateTime EndTime { get; set; }
         public bool StatusNotification { get; set; }
         public DateTime TimeNotification { get; set; }
+        public long TimeBeforNotification { get; set; }
         public string Color { get; set; }
         public string Description { get; set; }
     }
