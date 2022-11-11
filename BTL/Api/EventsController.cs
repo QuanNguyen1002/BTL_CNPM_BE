@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BTL.DBContext;
 using BTL.Entities;
+using System.Net.WebSockets;
 
 namespace BTL.Api
 {
@@ -105,5 +106,52 @@ namespace BTL.Api
         {
             return _context.Events.Any(e => e.Id == id);
         }
+        [Route("AllEvent")]
+        [HttpGet]
+        public List<EventDto> NewGetEvents()
+        {
+            return _context.Events.Select(s => new EventDto
+            {
+                Title = s.Name,
+                StartTime = s.BeginHour,
+                StartDate = s.BeginHour,
+                EndDate = s.EndHour,
+                EndTime = s.EndHour,
+                Description = s.Description,
+                StatusNotification = s.HasNotification,
+                TimeNotification = s.BeginHour.AddMinutes(s.TimeBeforNotification),
+                Color = s.Color
+            }).ToList();
+        }
+        [Route("Create")]
+        [HttpPost]
+        public void CreateEvent(EventDto input)
+        {
+            var t = _context.Calendars.FirstOrDefault().Id;
+            Event @event = new Event
+            {
+                Color = input.Color,
+                Name = input.Title,
+                BeginHour = input.StartTime,
+                EndHour = input.EndTime,
+                CalendarId = t,
+                HasNotification = input.StatusNotification,
+                TimeBeforNotification = (input.TimeNotification - input.StartTime).Minutes,
+            };
+            _context.Events.Add(@event);
+            _context.SaveChanges();
+        }
+    }
+    public class EventDto
+    {
+        public string Title { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public DateTime EndTime { get; set; }
+        public bool StatusNotification { get; set; }
+        public DateTime TimeNotification { get; set; }
+        public string Color { get; set; }
+        public string Description { get; set; }
     }
 }
