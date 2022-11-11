@@ -29,15 +29,7 @@ namespace BTL
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors(c =>
-            {
-                c.AddPolicy("AllowOrigin", o => o.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-
-                services.AddControllersWithViews()
-                .AddNewtonsoftJson(o => o.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
-                .AddNewtonsoftJson(o => o.SerializerSettings.ContractResolver
-                = new DefaultContractResolver());
-            });
+            services.AddCors();
 
             services.AddControllers();
 
@@ -55,6 +47,12 @@ namespace BTL
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseCors(x => x
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .SetIsOriginAllowed(origin => true) // allow any origin
+                                                    //.WithOrigins("http://localhost  001"  ); // Allow only this origin can also have multiple origins separated with comma
+                .AllowCredentials()); // allow credentials
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
