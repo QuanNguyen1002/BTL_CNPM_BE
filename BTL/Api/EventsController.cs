@@ -8,6 +8,11 @@ using Microsoft.EntityFrameworkCore;
 using BTL.DBContext;
 using BTL.Entities;
 using System.Net.WebSockets;
+using BTL.Migrations;
+using System.Drawing;
+using System.Globalization;
+using System.Xml.Linq;
+using Calendar = BTL.Entities.Calendar;
 
 namespace BTL.Api
 {
@@ -106,23 +111,23 @@ namespace BTL.Api
         {
             return _context.Events.Any(e => e.Id == id);
         }
-        [Route("AllEvent")]
-        [HttpGet]
-        public List<EventDto> NewGetEvents()
+        [Route("Update")]
+        [HttpPost]
+        public void UpdateEvent(EventDto input)
         {
-            return _context.Events.Select(s => new EventDto
-            {
-                Title = s.Name,
-                StartTime = s.BeginHour,
-                StartDate = s.BeginHour,
-                EndDate = s.EndHour,
-                EndTime = s.EndHour,
-                Description = s.Description,
-                StatusNotification = s.HasNotification,
-                TimeNotification = s.BeginHour.AddMinutes(s.TimeBeforNotification),
-                TimeBeforNotification = s.TimeBeforNotification,
-                Color = s.Color
-            }).ToList();
+            Event @event = GetEventById(input.id);
+            @event.Color = input.Color;
+            @event.Name = input.Title;
+            @event.BeginHour = input.StartTime;
+            @event.EndHour = input.EndTime;
+            @event.HasNotification = input.StatusNotification;
+            @event.TimeBeforNotification = input.TimeBeforNotification;
+            @event.Description = input.Description;
+            _context.SaveChanges();
+        }
+        private Event GetEventById(long id)
+        {
+            return _context.Events.Where(s => s.Id == id).FirstOrDefault();
         }
         [Route("Create")]
         [HttpPost]
@@ -138,17 +143,76 @@ namespace BTL.Api
                 CalendarId = t,
                 HasNotification = input.StatusNotification,
                 TimeBeforNotification = input.TimeBeforNotification,
+                Description = input.Description,
             };
             _context.Events.Add(@event);
             _context.SaveChanges();
         }
+        [Route("AllEvent")]
+        [HttpGet]
+        public List<EventDto> GetAllEvent()
+        {
+            return _context.Events.Select(s => new EventDto
+            {
+                id = s.Id,
+                Title = s.Name,
+                StartTime = s.BeginHour,
+                StartDate = s.Calendar.StartDate,
+                EndDate = s.Calendar.EndDate,
+                EndTime = s.EndHour,
+                Description = s.Description,
+                StatusNotification = s.HasNotification,
+                TimeNotification = s.BeginHour.AddMinutes(s.TimeBeforNotification),
+                TimeBeforNotification = s.TimeBeforNotification,
+                Color = s.Color
+            }).ToList();
+        }
+        [Route("CreateEvent")]
+        [HttpPost]
+        public void NewCreateEvent(EventDto input)
+        {
+            
+            Calendar calendar = new Calendar
+            {
+                CalendarType = CalendarType.None,
+                EndDate = input.EndDate,
+                StartDate = input.StartDate,
+                TeamId = GetTeamIdDefault(),
+            };
+            _context.Calendars.Add(calendar);
+            _context.SaveChanges();
+            Event @event = new Event
+            {
+                Color = input.Color,
+                Name = input.Title,
+                BeginHour = input.StartTime,
+                EndHour = input.EndTime,
+                CalendarId = calendar.Id,
+                HasNotification = input.StatusNotification,
+                TimeBeforNotification = input.TimeBeforNotification,
+            };
+            _context.Events.Add(@event);
+            _context.SaveChanges();
+        }
+        private long GetTeamIdDefault()
+        {
+            try
+            {
+                return _context.Teams.FirstOrDefault().Id;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
     }
     public class EventDto
     {
+        public long id { get; set; }
         public string Title { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public DateTime EndTime { get; set; }
         public bool StatusNotification { get; set; }
         public DateTime TimeNotification { get; set; }
