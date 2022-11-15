@@ -129,7 +129,7 @@ namespace BTL.Api
         }
         private Event GetEventById(long id)
         {
-            return _context.Events.Where(s => s.Id == id).FirstOrDefault();
+            return _context.Events.Include(s => s.Calendar).Where(s => s.Id == id).FirstOrDefault();
         }
         [Route("Create")]
         [HttpPost]
