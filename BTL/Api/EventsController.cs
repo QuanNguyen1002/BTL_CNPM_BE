@@ -192,6 +192,7 @@ namespace BTL.Api
                 CalendarId = calendar.Id,
                 HasNotification = input.StatusNotification,
                 TimeBeforNotification = input.TimeBeforNotification,
+                Description = input.Description,
             };
             _context.Events.Add(@event);
             _context.SaveChanges();
