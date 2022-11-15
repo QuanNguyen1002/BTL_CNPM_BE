@@ -119,6 +119,8 @@ namespace BTL.Api
             @event.Color = input.Color;
             @event.Name = input.Title;
             @event.BeginHour = input.StartTime;
+            @event.Calendar.StartDate = input.StartDate;
+            @event.Calendar.EndDate = input.EndDate;
             @event.EndHour = input.EndTime;
             @event.HasNotification = input.StatusNotification;
             @event.TimeBeforNotification = input.TimeBeforNotification;
