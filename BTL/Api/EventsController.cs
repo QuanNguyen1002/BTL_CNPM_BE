@@ -167,7 +167,7 @@ namespace BTL.Api
                 TimeNotification = s.BeginHour.AddMinutes(s.TimeBeforNotification),
                 TimeBeforNotification = s.TimeBeforNotification,
                 Color = s.Color
-            }).ToList();
+            }).OrderBy(s => s.StartTime).ToList();
         }
         [Route("CreateEvent")]
         [HttpPost]
